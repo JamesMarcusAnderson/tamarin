@@ -65,7 +65,8 @@ Full redacted session: [`sessions/iphone-x-swd-session.log`](sessions/iphone-x-s
 - **Probe enumerates:** `/dev/tty.usbmodem313371` + `/dev/tty.usbmodem313374`
   appear on the Mac; `system_profiler` shows `ID 2b3e:0004 2b3e Tamarin Cable`.
 - **SWD reaches the A11:** `Info : SWD DPIDR 0x4ba02477` — the iPhone X debug
-  port answers with the expected A11 IDCODE through the Pico probe.
+  port answers over SWD through the Pico probe (IDCODE as captured in the
+  session log below).
 - **CoreSight enumerates:** OpenOCD instantiates `iphone.ecore0` (6 hardware
   breakpoints, 4 watchpoints), `ecore1–3`, `pcore0–1`, `iphone.dbg`,
   `iphone.mem`, and `iphone.sep`, and opens GDB/telnet/Tcl servers.
