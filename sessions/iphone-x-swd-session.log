@@ -1,0 +1,46 @@
+# Redacted OpenOCD session — iPhone X (A11) via Tamarin probe
+# Source: DeepSeek conversation dd46d068-aa36-4b76-b8b6-8bbf96663dde (2025-04-15)
+# Host paths already anonymized in the export. Probe: Pico + Tamarin firmware.
+# Target config: t8015.cfg (Bonobo-derived). Phone: iPhone X, iOS 15.5.
+
+% sudo /Users/user/projects/openocd/src/openocd -f /Users/user/projects/openocd/tcl/interface/tamarin.cfg -f /Users/user/projects/bonobo-configs-master/t8015.cfg
+
+Open On-Chip Debugger 0.10.0+dev-gc6d4abbe (2025-04-15-17:02)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : only one transport option; autoselect 'swd'
+Warn : Transport "swd" was already selected
+adapter speed: 3000 kHz
+
+Info : clock speed 3000 kHz
+Info : SWD DPIDR 0x4ba02477
+Error: iphone.ecore0: missing UTT configuration, halt may not work
+Info : iphone.ecore0: hardware has 6 breakpoints, 4 watchpoints
+Error: iphone.ecore1: missing UTT configuration, halt may not work
+Error: iphone.ecore1 powered down!
+Error: iphone.ecore2: missing UTT configuration, halt may not work
+Error: iphone.ecore2 powered down!
+Error: iphone.ecore3: missing UTT configuration, halt may not work
+Error: iphone.ecore3 powered down!
+Error: iphone.pcore0: missing UTT configuration, halt may not work
+Error: iphone.pcore0 powered down!
+Error: iphone.pcore1: missing UTT configuration, halt may not work
+Error: iphone.pcore1 powered down!
+Error: iphone.sep: missing UTT configuration, halt may not work
+Error: iphone.sep powered down!
+Info : Listening on port 3333 for gdb connections
+Info : Listening on port 3334 for gdb connections
+Info : Listening on port 6666 for tcl connections
+Info : Listening on port 4444 for telnet connections
+Info : accepting 'telnet' connection on tcp/4444
+Error: Target not examined yet
+
+# --- What this proves ---
+# - "SWD DPIDR 0x4ba02477": the A11 debug port answered over SWD through the
+#   Pico/Tamarin probe with the expected IDCODE.
+# - CoreSight targets enumerated (ecore0 reports 6 hw breakpoints, 4 watchpoints).
+#
+# --- What it does NOT show ---
+# - Cores were powered down; "Target not examined yet" — no halt, no memory
+#   reads, no dumps were achieved in this session.
