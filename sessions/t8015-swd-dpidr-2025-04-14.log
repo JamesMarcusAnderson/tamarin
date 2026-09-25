@@ -1,0 +1,38 @@
+# Tamarin probe SWD sessions — T8015 target config
+# Source: DeepSeek conversation dd46d068-aa36-4b76-b8b6-8bbf96663dde
+#         "Fixing OpenOCD SWD Configuration Error" (2025-04-15)
+# All output below is the author's own pasted terminal output.
+# Interface: author's Tamarin probe (custom OpenOCD interface driver).
+# Target config: t8015.cfg. Host paths already anonymized in the export.
+
+## Session A — SWD link up, DPIDR reads back
+
+openocd % openocd -f /Users/user/projects/openocd/tcl/interface/tamarin.cfg -f /Users/user/projects/openocd/tcl/target/t8015.cfg
+Open On-Chip Debugger 0.10.0+dev-gc6d4abbe (2025-04-14-12:09)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : only one transport option; autoselect 'swd'
+Warn : Transport "swd" was already selected
+srst_only separate srst_gates_jtag srst_open_drain connect_deassert_srst
+
+Info : clock speed 10000 kHz
+Info : SWD DPIDR 0x00000001
+
+## Session B — same link, then the probe driver asserts in tamarin_swd_switch_seq
+
+openocd % openocd -f /Users/user/projects/openocd/tcl/interface/tamarin.cfg -f /Users/user/projects/openocd/tcl/target/t8015.cfg
+Open On-Chip Debugger 0.10.0+dev-gc6d4abbe (2025-04-14-12:09)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : only one transport option; autoselect 'swd'
+Warn : Transport "swd" was already selected
+srst_only separate srst_gates_jtag srst_open_drain connect_deassert_srst
+
+Info : clock speed 10000 kHz
+Info : SWD DPIDR 0x00000001
+
+
+Assertion failed: (false), function tamarin_swd_switch_seq, file tamarin.c, line 325.
+zsh: abort      openocd -f /Users/user/projects/openocd/tcl/interface/tamarin.cfg -f
