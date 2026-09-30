@@ -88,6 +88,6 @@ Full redacted session: [`sessions/iphone-x-swd-session.log`](sessions/iphone-x-s
 
 ## Credit
 
-Probe design and firmware by [stacksmashing](https://github.com/stacksmashing)
+Probe design and firmware by Thomas Roth ([stacksmashing](https://github.com/stacksmashing))
 (Tamarin). Target definitions derived from Bonobo's published A11 OpenOCD
 configs. Bench work, wiring, voltage measurements, and bring-up are original.
