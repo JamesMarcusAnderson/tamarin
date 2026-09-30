@@ -1,13 +1,19 @@
-# Tamarin — Pico SWD/JTAG probe for iPhone X (A11)
+# Tamarin — iPhone X (A11) debug-port bring-up over SWD
 
-A hardware debug-probe project: a Raspberry Pi Pico flashed with
-[stacksmashing's Tamarin firmware](https://github.com/stacksmashing/tamarin-firmware)
-(unmodified), used as an SWD/JTAG adapter through OpenOCD to reach the debug
-port of an iPhone X (Apple A11 / T8015).
+The iPhone X's debug port is reachable over SWD — but only if you can speak
+the right protocol through the Lightning connector's IDBUS lanes. This
+project proves it can be done with a $4 Raspberry Pi Pico: flash it with
+Thomas Roth's ([stacksmashing](https://github.com/stacksmashing)) Tamarin
+firmware (unmodified), wire it to a Lightning breakout, and drive it with
+OpenOCD to enumerate the A11's CoreSight debug fabric.
 
-This is debug-port bring-up and nothing more: prove the probe enumerates,
-prove SWD talks to the target, enumerate what CoreSight exposes. No firmware
-was written, no console was accessed, nothing was dumped.
+This is hardware diagnostics and failure analysis: debug-port bring-up and
+nothing more. Prove the probe enumerates, prove SWD talks to the target,
+enumerate what CoreSight exposes. No firmware was written, no console was
+accessed, nothing was dumped.
+
+**Scope:** all work on personally-owned hardware in an isolated bench setup.
+Read-only throughout — no writes to the target, no third-party systems.
 
 ## Hardware
 
@@ -73,6 +79,16 @@ Full redacted session: [`sessions/iphone-x-swd-session.log`](sessions/iphone-x-s
 - **Sanity baseline:** the same bench (Pico as CMSIS-DAP Picoprobe) debugs an
   RP2040 target cleanly — `SWD DPIDR 0x0bc12477`, both Cortex-M0+ cores
   examined, GDB server up. Proves the method before pointing it at the phone.
+
+## Dead ends
+
+- **Dead link, then a driver crash (2025-04-14):** an early session read
+  `SWD DPIDR 0x00000001` — the link wasn't really up — and a follow-up run
+  aborted OpenOCD on an assertion in `tamarin_swd_switch_seq`
+  ([full log](sessions/t8015-swd-dpidr-2025-04-14.log)). Documented as-is;
+  the successful bring-up is in
+  [`sessions/iphone-x-swd-session.log`](sessions/iphone-x-swd-session.log).
+  The failure is data.
 
 ## Explicit non-claims
 
