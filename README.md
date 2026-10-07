@@ -1,109 +1,98 @@
-# Tamarin — iPhone X (A11) debug-port bring-up over SWD
+# Tamarin — Pico SWD Debug Probe for iPhone X (A11/T8015)
 
-The iPhone X's debug port is reachable over SWD — but only if you can speak
-the right protocol through the Lightning connector's IDBUS lanes. This
-project proves it can be done with a $4 Raspberry Pi Pico: flash it with
-Thomas Roth's ([stacksmashing](https://github.com/stacksmashing)) Tamarin
-firmware (unmodified), wire it to a Lightning breakout, and drive it with
-OpenOCD to enumerate the A11's CoreSight debug fabric.
+Bring-up of a Raspberry Pi Pico as an SWD debug probe for the Apple A11
+(T8015) in a jailbroken, demoted iPhone X, using a custom OpenOCD fork
+and hand-written interface/target configurations.
 
-This is hardware diagnostics and failure analysis: debug-port bring-up and
-nothing more. Prove the probe enumerates, prove SWD talks to the target,
-enumerate what CoreSight exposes. No firmware was written, no console was
-accessed, nothing was dumped.
+## Status
 
-**Scope:** all work on personally-owned hardware in an isolated bench setup.
-Read-only throughout — no writes to the target, no third-party systems.
+Bring-up is ~90% complete. The full toolchain builds, the probe enumerates,
+and OpenOCD reaches the SWD DP on the target (`Info: SWD DPIDR 0x00000001`
+at 10 MHz). No stable, sustained halt/read-memory session is on record —
+the last observed failure is a low-level SWD switch-sequence abort in the
+Tamarin driver (`tamarin.c:325`), i.e. a probe↔target signaling problem,
+not a config problem. See REVIEW.md.
 
-## Hardware
+## Hardware bench
 
-| Part | Role |
+| Role | Hardware |
 |---|---|
-| Raspberry Pi Pico | Probe — runs Tamarin firmware, presents as "Tamarin Cable" over USB |
-| 16-pin Lightning connector breakout board | Physical tap into the phone's IDBUS lanes |
-| iPhone X (A11 / T8015), iOS 15.5, jailbroken (palera1n) | Target |
-| macOS host | Runs OpenOCD |
+| Target | iPhone X, A11 (T8015, CPID:8015), iOS 15.5, palera1n jailbreak + `--demote` |
+| Probe | Raspberry Pi Pico (RP2040); Pico 2W (RP2350) as alternate |
+| Cable | HAM DCSD ALEX cable (FTDI 0403:6001, later 6010) — enumerated, then bypassed |
+| Host | Intel MacBook Air, macOS 15 |
+| Spares | Pi Zero 2W; Glasgow Digital Interface Explorer (evaluated, not used) |
 
-## Wiring (confirmed)
+## Software
 
-Lightning breakout → Pico, as used in this project:
+- **OpenOCD**: `stacksmashing/openocd-tamarin` fork (provides the `tamarin`
+  adapter driver and `tamarin.c`). Mainline OpenOCD cannot drive this probe.
+- **Probe firmware**: `stacksmashing/tamarin-firmware` on the Pico.
+- **Reference**: Bonobo SWD configs (docs.bonoboswd.com) — used as the
+  source for core/CTI base addresses in `t8015-cores.cfg` (unverified).
 
-| Breakout pin | Signal | Lane | Pico |
-|---|---|---|---|
-| Pin 1 | GND | Ground | GND |
-| Pin 2 | L0+ | Lane 0 positive | USB0 P |
-| Pin 3 | L0− | Lane 0 negative | USB0 N |
-| Pin 4 | ID0 | Lane 0 ID/control | **SWCLK → GP3** |
-| Pin 5 | VCC | 5V power | VBUS |
-| Pin 6 | L1− | Lane 1 negative | UART TX → GPO #1¹ |
-| Pin 7 | L1+ | Lane 1 positive | UART RX → GP1 |
-| Pin 8 | ID1 | Lane 1 ID/control | **SWDIO → GP2** |
+## Key identifiers
 
-> **Voltage warning (measured):** Tristar runs on a 1.8 V source and the IDBUS
-> lines are 3.0 V-tolerant (verified with an oscilloscope). Do not drive IDBUS
-> with 5 V-tolerant devices (e.g. some Arduinos) without a level shifter.
->
-> ¹ James's notes read "GPO #1" — presumed GP0 typo; the UART lines were not
-> used for SWD in this project.
+| Item | Value | Notes |
+|---|---|---|
+| TAP IDCODE (`-expected-id`) | `0x4ba02477` | Converged during bring-up |
+| Expected SWD DPIDR | `0x0bc11477` | Never observed on the wire; aspirational |
+| Observed DPIDR | `0x00000001` | Dormant/unresponsive DP — the open problem |
+| Demotion register | `0x2102BC000` | `mdw` → `0x00000000` = demoted, `0x00010206` = not demoted |
+| Watchdog kill, E-core 0 | `mww 0x2102BC000 0x0` | |
+| Watchdog kill, E-core 1 | `mww 0x2102BD000 0x0` | |
 
-## Software setup
+## Timeline
 
-1. Flash the Pico with Tamarin firmware (upstream release, unmodified):
-   it enumerates as USB `2b3e:0004` "Tamarin Cable", serial `31337`, exposing
-   three USB endpoints — two serial ports (control + monitor).
-2. Build OpenOCD from source with the Tamarin probe driver
-   (the upstream Tamarin project ships an OpenOCD fork with `adapter driver tamarin`).
-3. Target config: based on Bonobo's published `t8015.cfg`
-   ([docs.bonoboswd.com](https://docs.bonoboswd.com)) — A11 DAP, CoreSight CTIs,
-   `iphone.dbg` / `iphone.mem` / `iphone.sep` targets.
-4. Interface config: [`openocd/tamarin.cfg`](openocd/tamarin.cfg) (this repo).
+- **2025-03-27 → 2025-04-18**: core bring-up sprint — jailbreak/demote,
+  probe wiring, OpenOCD config iteration, error elimination.
+- **2025-05 → 2025-07**: follow-ons — SEP questions, Black Magic Probe on
+  A12, Astris tooling, Kong probe research.
+- **2025-11, 2026-04, 2026-06**: occasional returns (binary analysis,
+  TG1682 cross-over).
 
-Connect:
+## Files
 
-```sh
-sudo openocd -f openocd/tamarin.cfg -f t8015.cfg
+```
+openocd/tamarin.cfg       Interface: tamarin driver, SWD, 10 MHz, TAP creation
+openocd/t8015.cfg         Target: DAP, A11 CPU + MEM-AP, watchdog-kill reset-init
+openocd/t8015-cores.cfg   UNVERIFIED full config: E/P cores, CTI, SEP (Bonobo-derived)
+docs/setup.md             Step-by-step bring-up procedure
+docs/troubleshooting.md   Every error hit during bring-up, and the fix
+docs/glossary.md          SWD / DAP / OpenOCD terminology used in this project
+docs/images/              Diagrams (SVG, editable)
+REVIEW.md                 Technical review: corrections, flags, open questions
 ```
 
-Full redacted session: [`sessions/iphone-x-swd-session.log`](sessions/iphone-x-swd-session.log).
+## Diagrams
 
-## Verified results
+![Bench wiring](docs/images/wiring.svg)
+*Probe/host/iPhone wiring — the iPhone-side pinout is UNVERIFIED.*
 
-- **Probe enumerates:** `/dev/tty.usbmodem313371` + `/dev/tty.usbmodem313374`
-  appear on the Mac; `system_profiler` shows `ID 2b3e:0004 2b3e Tamarin Cable`.
-- **SWD reaches the A11:** `Info : SWD DPIDR 0x4ba02477` — the iPhone X debug
-  port answers over SWD through the Pico probe (IDCODE as captured in the
-  session log below).
-- **CoreSight enumerates:** OpenOCD instantiates `iphone.ecore0` (6 hardware
-  breakpoints, 4 watchpoints), `ecore1–3`, `pcore0–1`, `iphone.dbg`,
-  `iphone.mem`, and `iphone.sep`, and opens GDB/telnet/Tcl servers.
-- **Sanity baseline:** the same bench (Pico as CMSIS-DAP Picoprobe) debugs an
-  RP2040 target cleanly — `SWD DPIDR 0x0bc12477`, both Cortex-M0+ cores
-  examined, GDB server up. Proves the method before pointing it at the phone.
+![OpenOCD stack](docs/images/swd-stack.svg)
+*Config → TAP → DAP → target creation order.*
 
-## Dead ends
+![Bring-up flowchart](docs/images/bringup-flow.svg)
+*End-to-end bring-up with decision points.*
 
-- **Dead link, then a driver crash (2025-04-14):** an early session read
-  `SWD DPIDR 0x00000001` — the link wasn't really up — and a follow-up run
-  aborted OpenOCD on an assertion in `tamarin_swd_switch_seq`
-  ([full log](sessions/t8015-swd-dpidr-2025-04-14.log)). Documented as-is;
-  the successful bring-up is in
-  [`sessions/iphone-x-swd-session.log`](sessions/iphone-x-swd-session.log).
-  The failure is data.
+![SWD switch sequence](docs/images/swd-timing.svg)
+*The JTAG→SWD transaction that aborts at `tamarin.c:325`.*
 
-## Explicit non-claims
+![DAP topology](docs/images/dap-topology.svg)
+*TAP → DAP → target relationships and the `-chain-position`/`-dap` rule.*
 
-- **No custom firmware.** The Pico runs stacksmashing's Tamarin firmware
-  unmodified. Nothing here is a firmware project.
-- **No DCSD console.** The cable's monitor port prints mode status only; the
-  DCSD serial console was not used.
-- **No memory access.** Cores reported `powered down` / `missing UTT
-  configuration`; `mdw` attempts returned `Target not examined yet`. No halting,
-  no reads, no dumps.
-- **No bypass work.** No activation, iCloud, or lock-screen work of any kind.
-  Debug-port bring-up only.
+## Quick start
 
-## Credit
+```sh
+# Terminal 1 — start OpenOCD
+openocd -f openocd/tamarin.cfg -f openocd/t8015.cfg
 
-Probe design and firmware by Thomas Roth ([stacksmashing](https://github.com/stacksmashing))
-(Tamarin). Target definitions derived from Bonobo's published A11 OpenOCD
-configs. Bench work, wiring, voltage measurements, and bring-up are original.
+# Terminal 2 — drive the session
+telnet localhost 4444
+> init
+> aarch64 dbginit
+> reset halt
+> mdw 0x2102BC000 1
+```
+
+Full procedure: `docs/setup.md`. When something breaks: `docs/troubleshooting.md`.
