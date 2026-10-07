@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" font-family="sans-serif">
+  <title>SWD switch sequence — the transaction that fails at tamarin.c:325</title>
+  <style>
+    .title { font-size: 20px; font-weight: bold; fill: #111; }
+    .label { font-size: 14px; fill: #111; }
+    .sub { font-size: 12px; fill: #555; }
+    .mono { font-family: monospace; font-size: 12px; fill: #111; }
+    .sig { stroke: #1a56db; stroke-width: 2.5; fill: none; }
+    .sig2 { stroke: #d9a400; stroke-width: 2.5; fill: none; }
+    .cellhi { fill: #fef3c7; stroke: #d9a400; }
+    .celllo { fill: #ffffff; stroke: #999; }
+    .bit { font-family: monospace; font-size: 11px; fill: #111; }
+  </style>
+
+  <text x="480" y="32" text-anchor="middle" class="title">SWD switch sequence (JTAG → SWD)</text>
+  <text x="480" y="54" text-anchor="middle" class="sub">Schematic, not to scale — the transaction that aborts at tamarin.c:325 when the T8015 never ACKs</text>
+
+  <!-- SWCLK -->
+  <text x="20" y="108" class="mono">SWCLK</text>
+  <path id="clk" class="sig" d="M60,120 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0 l0,-22 l14,0 l0,22 l14,0"/>
+
+  <text x="20" y="200" class="mono">SWDIO</text>
+  <!-- segment 1: line reset, SWDIO high -->
+  <line x1="60" y1="190" x2="300" y2="190" class="sig2"/>
+  <text x="180" y="178" text-anchor="middle" class="sub">line reset: ≥50 clocks, SWDIO=1</text>
+
+  <!-- segment 2: 16-bit JTAG-to-SWD select 0xE79E, LSB first -->
+  <!-- wire order: 0 1 1 1 1 0 0 1 1 0 0 1 1 1 1 0 -->
+  <g id="select">
+    <rect x="300" y="168" width="22" height="22" class="celllo"/><text x="311" y="184" text-anchor="middle" class="bit">0</text>
+    <rect x="322" y="168" width="22" height="22" class="cellhi"/><text x="333" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="344" y="168" width="22" height="22" class="cellhi"/><text x="355" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="366" y="168" width="22" height="22" class="cellhi"/><text x="377" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="388" y="168" width="22" height="22" class="cellhi"/><text x="399" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="410" y="168" width="22" height="22" class="celllo"/><text x="421" y="184" text-anchor="middle" class="bit">0</text>
+    <rect x="432" y="168" width="22" height="22" class="celllo"/><text x="443" y="184" text-anchor="middle" class="bit">0</text>
+    <rect x="454" y="168" width="22" height="22" class="cellhi"/><text x="465" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="476" y="168" width="22" height="22" class="cellhi"/><text x="487" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="498" y="168" width="22" height="22" class="celllo"/><text x="509" y="184" text-anchor="middle" class="bit">0</text>
+    <rect x="520" y="168" width="22" height="22" class="celllo"/><text x="531" y="184" text-anchor="middle" class="bit">0</text>
+    <rect x="542" y="168" width="22" height="22" class="cellhi"/><text x="553" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="564" y="168" width="22" height="22" class="cellhi"/><text x="575" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="586" y="168" width="22" height="22" class="cellhi"/><text x="597" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="608" y="168" width="22" height="22" class="cellhi"/><text x="619" y="184" text-anchor="middle" class="bit">1</text>
+    <rect x="630" y="168" width="22" height="22" class="celllo"/><text x="641" y="184" text-anchor="middle" class="bit">0</text>
+  </g>
+  <text x="476" y="158" text-anchor="middle" class="sub">JTAG→SWD select: 0xE79E, LSB first (bit order on wire as shown)</text>
+
+  <!-- segment 3: line reset -->
+  <line x1="652" y1="190" x2="760" y2="190" class="sig2"/>
+  <text x="706" y="178" text-anchor="middle" class="sub">line reset</text>
+
+  <!-- segment 4: DPIDR read -->
+  <rect x="760" y="168" width="140" height="44" fill="#fee2e2" stroke="#c22" stroke-width="2" rx="6"/>
+  <text x="830" y="188" text-anchor="middle" class="mono">DPIDR read</text>
+  <text x="830" y="204" text-anchor="middle" class="sub">request → ACK → data</text>
+
+  <!-- failure annotation -->
+  <line x1="830" y1="212" x2="830" y2="280" stroke="#c22" stroke-width="2" stroke-dasharray="5,4"/>
+  <rect x="560" y="286" width="340" height="76" fill="#fff7ed" stroke="#b45309" stroke-width="2" rx="8"/>
+  <text x="730" y="310" text-anchor="middle" class="label" font-weight="bold" fill="#7a3b00">Failure point</text>
+  <text x="730" y="332" text-anchor="middle" class="sub">No ACK from target → tamarin_swd_switch_seq hits</text>
+  <text x="730" y="350" text-anchor="middle" class="mono">assert(false) at tamarin.c:325 → abort</text>
+
+  <text x="60" y="400" class="sub">Observed on this bench: DPIDR reads back 0x00000001 (dormant DP) instead of the expected 0x0bc11477.</text>
+  <text x="60" y="420" class="sub">Fix direction: replace the assert with an error return, then debug the underlying cause (wiring, demotion, power, clock).</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" font-family="sans-serif">
+  <title>OpenOCD software stack — Tamarin to T8015</title>
+  <style>
+    .box { fill: #ffffff; stroke-width: 2; rx: 8; }
+    .title { font-size: 20px; font-weight: bold; fill: #111; }
+    .layer { font-size: 15px; font-weight: bold; }
+    .mono { font-family: monospace; font-size: 13px; fill: #222; }
+    .note { font-size: 12.5px; fill: #444; }
+    .arrow { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#ah); }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#333"/>
+    </marker>
+  </defs>
+
+  <text x="450" y="34" text-anchor="middle" class="title">OpenOCD stack — Tamarin probe to T8015</text>
+
+  <!-- Layer 1: interface -->
+  <rect x="60" y="60" width="780" height="168" class="box" style="stroke:#6d28d9"/>
+  <text x="80" y="88" class="layer" fill="#6d28d9">openocd/tamarin.cfg — interface</text>
+  <text x="80" y="114" class="mono">interface tamarin                    # driver from the openocd-tamarin fork</text>
+  <text x="80" y="136" class="mono">transport select swd</text>
+  <text x="80" y="158" class="mono">adapter_khz 10000                    # fall back: 5000, then 1000</text>
+  <text x="80" y="180" class="mono">swd newdap t8015 cpu -irlen 6 -expected-id 0x4ba02477</text>
+  <text x="80" y="202" class="mono">reset_config srst_only</text>
+  <text x="620" y="180" class="note">creates TAP →</text>
+  <text x="620" y="200" class="mono" font-weight="bold">t8015.cpu</text>
+
+  <line x1="450" y1="228" x2="450" y2="258" class="arrow"/>
+
+  <!-- Layer 2: target -->
+  <rect x="60" y="258" width="780" height="196" class="box" style="stroke:#0e7490"/>
+  <text x="80" y="286" class="layer" fill="#0e7490">openocd/t8015.cfg — target</text>
+  <text x="80" y="312" class="mono">dap create t8015.dap -chain-position t8015.cpu</text>
+  <text x="80" y="334" class="mono">target create t8015.cpu aarch64 -endian little -dap t8015.dap</text>
+  <text x="80" y="356" class="mono">target create t8015.mem mem_ap  -endian little -dap t8015.dap</text>
+  <text x="80" y="384" class="mono">t8015.cpu configure -event reset-init { halt; mww 0x2102BC000 0x0; … }</text>
+  <text x="80" y="412" class="note">Rule: <tspan class="mono">dap create</tspan> takes <tspan class="mono">-chain-position</tspan> (→ TAP) ·</text>
+  <text x="80" y="430" class="note"><tspan class="mono">target create</tspan> takes <tspan class="mono">-dap</tspan> (→ DAP). Mixing them is the #1 config error.</text>
+
+  <line x1="450" y1="454" x2="450" y2="484" class="arrow"/>
+
+  <!-- Layer 3: session -->
+  <rect x="60" y="484" width="780" height="96" class="box" style="stroke:#1c7c3c"/>
+  <text x="80" y="512" class="layer" fill="#1c7c3c">Session — telnet localhost 4444 (configs define, operator drives)</text>
+  <text x="80" y="540" class="mono">init → aarch64 dbginit → reset halt → mdw 0x2102BC000 1</text>
+  <text x="80" y="562" class="note">demotion register: 0x00000000 = demoted · 0x00010206 = not demoted — then GDB on :3333</text>
+
+  <line x1="450" y1="580" x2="450" y2="610" class="arrow"/>
+
+  <!-- Layer 4: hardware -->
+  <rect x="60" y="610" width="780" height="100" class="box" style="stroke:#c22"/>
+  <text x="80" y="638" class="layer" fill="#c22">Hardware</text>
+  <text x="80" y="664" class="mono">SWD-DP (DPIDR — expect 0x0bc11477; observed 0x00000001 = dormant) → A11 debug port</text>
+  <text x="80" y="688" class="note">The switch sequence that reaches this DP aborts at tamarin.c:325 when the target never ACKs.</text>
+</svg>

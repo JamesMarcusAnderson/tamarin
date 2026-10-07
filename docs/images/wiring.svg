@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" font-family="sans-serif">
+  <title>Tamarin bench wiring — Pico SWD probe to iPhone X</title>
+  <style>
+    .box { fill: #ffffff; stroke: #333; stroke-width: 2; rx: 8; }
+    .title { font-size: 20px; font-weight: bold; fill: #111; }
+    .label { font-size: 14px; fill: #111; }
+    .sub { font-size: 12px; fill: #555; }
+    .mono { font-family: monospace; font-size: 13px; fill: #111; }
+    .wire { stroke-width: 3; fill: none; }
+    .note { font-size: 13px; fill: #7a3b00; }
+  </style>
+
+  <text x="480" y="36" text-anchor="middle" class="title">Tamarin bench wiring</text>
+  <text x="480" y="58" text-anchor="middle" class="sub">Raspberry Pi Pico as SWD probe for iPhone X (A11/T8015) — schematic, not to scale</text>
+
+  <!-- Host -->
+  <rect x="40" y="170" width="190" height="130" class="box" style="stroke:#1a56db"/>
+  <text x="135" y="200" text-anchor="middle" class="label" font-weight="bold">MacBook Air</text>
+  <text x="135" y="222" text-anchor="middle" class="sub">host · macOS</text>
+  <text x="135" y="244" text-anchor="middle" class="mono">openocd</text>
+  <text x="135" y="266" text-anchor="middle" class="mono">telnet :4444 · gdb :3333</text>
+
+  <!-- Probe -->
+  <rect x="390" y="170" width="190" height="130" class="box" style="stroke:#1c7c3c"/>
+  <text x="485" y="200" text-anchor="middle" class="label" font-weight="bold">Raspberry Pi Pico</text>
+  <text x="485" y="222" text-anchor="middle" class="sub">RP2040 (Pico 2W / RP2350 alt.)</text>
+  <text x="485" y="244" text-anchor="middle" class="mono">tamarin-firmware</text>
+  <text x="485" y="266" text-anchor="middle" class="sub">SWD probe</text>
+
+  <!-- USB host->probe -->
+  <line x1="230" y1="235" x2="390" y2="235" class="wire" stroke="#1a56db"/>
+  <text x="310" y="225" text-anchor="middle" class="sub">USB</text>
+
+  <!-- iPhone -->
+  <rect x="740" y="110" width="180" height="250" class="box" style="stroke:#c22"/>
+  <text x="830" y="140" text-anchor="middle" class="label" font-weight="bold">iPhone X</text>
+  <text x="830" y="160" text-anchor="middle" class="sub">A11 / T8015 · iOS 15.5</text>
+  <text x="830" y="178" text-anchor="middle" class="sub">palera1n · demoted</text>
+
+  <!-- Debug port sub-box -->
+  <rect x="755" y="195" width="150" height="95" class="box" style="stroke:#c22;stroke-dasharray:6,3"/>
+  <text x="830" y="215" text-anchor="middle" class="sub" font-weight="bold">debug port</text>
+  <text x="830" y="235" text-anchor="middle" class="mono">SWDIO · SWCLK · GND</text>
+  <text x="830" y="255" text-anchor="middle" class="sub">SRST only (no TRST)</text>
+  <text x="830" y="275" text-anchor="middle" class="sub" font-style="italic">pinout UNVERIFIED</text>
+
+  <!-- Lightning sub-box -->
+  <rect x="755" y="300" width="150" height="45" class="box" style="stroke:#c22;stroke-dasharray:6,3"/>
+  <text x="830" y="322" text-anchor="middle" class="sub">Lightning</text>
+
+  <!-- SWD wires probe -> debug port -->
+  <line x1="580" y1="205" x2="755" y2="215" class="wire" stroke="#d9a400"/>
+  <text x="668" y="198" text-anchor="middle" class="mono">SWDIO</text>
+  <line x1="580" y1="235" x2="755" y2="235" class="wire" stroke="#1a56db"/>
+  <text x="668" y="228" text-anchor="middle" class="mono">SWCLK</text>
+  <line x1="580" y1="265" x2="755" y2="258" class="wire" stroke="#111"/>
+  <text x="668" y="282" text-anchor="middle" class="mono">GND</text>
+
+  <!-- DCSD cable (bypassed for debug) -->
+  <path d="M 830 345 L 830 430 L 135 430 L 135 300" class="wire" stroke="#888" stroke-dasharray="8,5"/>
+  <text x="480" y="422" text-anchor="middle" class="sub">HAM DCSD ALEX cable (FTDI 0403:6001) — serial / DCSD transport · bypassed for JTAG/SWD</text>
+  <text x="135" y="292" text-anchor="middle" class="sub">Lightning → Mac</text>
+
+  <!-- Note -->
+  <rect x="40" y="480" width="880" height="70" class="box" style="stroke:#b45309;fill:#fff7ed"/>
+  <text x="60" y="505" class="note" font-weight="bold">Note:</text>
+  <text x="60" y="527" class="note">iPhone-side debug-port pinout is UNVERIFIED in the archive — confirm against tamarin-firmware docs</text>
+  <text x="60" y="545" class="note">or a continuity check before powering the link. Start at adapter_khz 1000 if the link is unstable.</text>
+</svg>

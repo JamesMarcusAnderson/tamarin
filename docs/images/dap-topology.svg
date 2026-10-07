@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" font-family="sans-serif">
+  <title>DAP and target topology — T8015</title>
+  <style>
+    .title { font-size: 20px; font-weight: bold; fill: #111; }
+    .box { fill: #ffffff; stroke-width: 2; rx: 8; }
+    .name { font-family: monospace; font-size: 15px; font-weight: bold; fill: #111; }
+    .cmd { font-family: monospace; font-size: 11.5px; fill: #444; }
+    .edge { font-family: monospace; font-size: 12px; fill: #111; }
+    .note { font-size: 12.5px; fill: #444; }
+    .arrow { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#ah); }
+    .arrowd { stroke: #888; stroke-width: 2; fill: none; stroke-dasharray: 6,4; marker-end: url(#ahd); }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#333"/>
+    </marker>
+    <marker id="ahd" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 z" fill="#888"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="34" text-anchor="middle" class="title">DAP and target topology — T8015</text>
+
+  <!-- TAP -->
+  <rect x="40" y="200" width="200" height="110" class="box" style="stroke:#6d28d9"/>
+  <text x="140" y="230" text-anchor="middle" class="name">t8015.cpu</text>
+  <text x="140" y="252" text-anchor="middle" class="cmd">SWD TAP</text>
+  <text x="140" y="272" text-anchor="middle" class="cmd">swd newdap (tamarin.cfg)</text>
+  <text x="140" y="292" text-anchor="middle" class="cmd">IDCODE 0x4ba02477</text>
+
+  <!-- arrow TAP -> DAP -->
+  <line x1="240" y1="255" x2="340" y2="255" class="arrow"/>
+  <text x="290" y="244" text-anchor="middle" class="edge">-chain-position</text>
+
+  <!-- DAP -->
+  <rect x="340" y="200" width="200" height="110" class="box" style="stroke:#0e7490"/>
+  <text x="440" y="230" text-anchor="middle" class="name">t8015.dap</text>
+  <text x="440" y="252" text-anchor="middle" class="cmd">Debug Access Port</text>
+  <text x="440" y="272" text-anchor="middle" class="cmd">dap create (t8015.cfg)</text>
+  <text x="440" y="292" text-anchor="middle" class="cmd">AP 1 · AP 4</text>
+
+  <!-- arrows DAP -> targets -->
+  <line x1="540" y1="230" x2="640" y2="170" class="arrow"/>
+  <line x1="540" y1="280" x2="640" y2="330" class="arrow"/>
+  <text x="590" y="196" text-anchor="middle" class="edge">-dap</text>
+  <text x="590" y="312" text-anchor="middle" class="edge">-dap</text>
+
+  <!-- targets -->
+  <rect x="640" y="110" width="280" height="100" class="box" style="stroke:#1c7c3c"/>
+  <text x="780" y="140" text-anchor="middle" class="name">t8015.cpu — aarch64</text>
+  <text x="780" y="162" text-anchor="middle" class="cmd">application cores · reset-init:</text>
+  <text x="780" y="182" text-anchor="middle" class="cmd">halt + watchdog kills</text>
+
+  <rect x="640" y="290" width="280" height="100" class="box" style="stroke:#1c7c3c"/>
+  <text x="780" y="320" text-anchor="middle" class="name">t8015.mem — mem_ap</text>
+  <text x="780" y="342" text-anchor="middle" class="cmd">direct memory access</text>
+  <text x="780" y="362" text-anchor="middle" class="cmd">no core halt required</text>
+
+  <!-- extended dashed -->
+  <rect x="340" y="420" width="580" height="100" class="box" style="stroke:#888;stroke-dasharray:8,5;fill:#fafafa"/>
+  <text x="630" y="448" text-anchor="middle" class="name" fill="#555">t8015-cores.cfg — UNVERIFIED</text>
+  <text x="630" y="472" text-anchor="middle" class="cmd">ecore0–3 · pcore0–1 (aarch64 + CTI each) · SEP (AP 4)</text>
+  <text x="630" y="494" text-anchor="middle" class="cmd">bases from Bonobo reference — validate on hardware first</text>
+  <line x1="440" y1="310" x2="440" y2="420" class="arrowd"/>
+
+  <text x="40" y="80" class="note">Creation order matters: TAP → DAP → targets. <tspan style="font-family:monospace">dap create</tspan> takes</text>
+  <text x="40" y="100" class="note"><tspan style="font-family:monospace">-chain-position</tspan> (points at the TAP); <tspan style="font-family:monospace">target create</tspan> takes <tspan style="font-family:monospace">-dap</tspan> (points at the DAP).</text>
+  <text x="40" y="120" class="note">Swapping them is the "target requires -dap parameter instead of -chain-position" error.</text>
+</svg>
